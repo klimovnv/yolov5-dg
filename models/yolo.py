@@ -34,6 +34,8 @@ try:
 except ImportError:
     thop = None
 
+import onnx_setting
+
 
 class Detect(nn.Module):
     stride = None  # strides computed during build
@@ -52,7 +54,7 @@ class Detect(nn.Module):
         self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  # output conv
         self.inplace = inplace  # use inplace ops (e.g. slice assignment)
 
-    def forward(self, x):
+    def forward_org(self, x):
         z = []  # inference output
         for i in range(self.nl):
             x[i] = self.m[i](x[i])  # conv
@@ -75,6 +77,22 @@ class Detect(nn.Module):
                 z.append(y.view(bs, -1, self.no))
 
         return x if self.training else (torch.cat(z, 1),) if self.export else (torch.cat(z, 1), x)
+
+    def forward_onnx(self, x):
+        z = []  # inference output
+        for i in range(self.nl):
+            x[i] = self.m[i](x[i])  # conv
+            bs, _, ny, nx = x[i].shape  # x(bs,255,20,20) to x(bs,3,20,20,85)
+            x[i] = x[i].view(bs, self.na, self.no, ny, nx).permute(0, 3, 4, 1, 2).contiguous()  # Mehrdad: Onnx
+            z.append(x[i].view(bs, -1, self.no))  # Mehrdad: Onnx
+        return torch.cat(z, 1)
+
+    def forward(self, x):
+        if onnx_setting.export_onnx == False:
+            return self.forward_org(x)
+        else:
+            return self.forward_onnx(x)
+
 
     def _make_grid(self, nx=20, ny=20, i=0):
         d = self.anchors[i].device
