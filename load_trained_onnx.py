@@ -5,14 +5,11 @@ import logging
 import argparse
 
 from utils.general import check_suffix, check_yaml, check_file, check_dataset, colorstr, check_img_size, increment_path
-from utils.torch_utils import intersect_dicts, select_device
+from utils.torch_utils import select_device
+from utils.general import intersect_dicts
 from utils.downloads import attempt_download
 from models.yolo import Model
 from pathlib import Path
-from utils.datasets import create_dataloader
-
-import val  # for end-of-epoch mAP
-from models.experimental import attempt_load
 
 import onnx_setting
 
@@ -31,11 +28,11 @@ def parse_opt(known=False):
     parser.add_argument('--weights', type=str, default=ROOT / 'yolov5s.pt', help='initial weights path')
     parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
     parser.add_argument('--data', type=str, default=ROOT / 'data/coco128.yaml', help='dataset.yaml path')
-    parser.add_argument('--hyp', type=str, default=ROOT / 'data/hyps/hyp.scratch.yaml', help='hyperparameters path')
+    parser.add_argument('--hyp', type=str, default=ROOT / 'data/hyps/hyp.scratch-low.yaml', help='hyperparameters path')
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
     parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='train, val image size (pixels)')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--workers', type=int, default=8, help='maximum number of dataloader workers')
     parser.add_argument('--cache', type=str, nargs='?', const='ram', help='--cache images in "ram" (default) or "disk"')
     parser.add_argument('--project', default=ROOT / 'runs/val_load', help='save to project/name')
@@ -87,10 +84,6 @@ if __name__ == "__main__":
     else:
         model = Model(cfg, ch=3, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
 
-    for module in model.modules():
-        module.onnx_mode = True
-
-
     model.eval()
     # DG_Prune.dump_sparsity_stat_weight_base(model, save_dir)
 
@@ -101,9 +94,8 @@ if __name__ == "__main__":
     imgsz = check_img_size(opt.imgsz, gs, floor=gs * 2)  # verify imgsz is gs-multiple 
     # imgsz = 256
 # 
-    import os
     # dummy_input = torch.randn(1, 3, opt.imgsz, opt.imgsz, device='cpu')
     dummy_input = torch.randn(1, 12, opt.imgsz // 2, opt.imgsz // 2, device='cpu')
-    onnx_file_name = "{}_{}_{}.onnx".format(os.path.splitext(data_name)[0], os.path.splitext(cfg_name)[0], opt.imgsz)
+    onnx_file_name = "{}.onnx".format(opt.name)
     torch.onnx.export(model.to('cpu'), dummy_input, onnx_file_name, export_params=True, opset_version=11, do_constant_folding=True)
     print (onnx_file_name)
