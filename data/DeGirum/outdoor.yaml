@@ -1,0 +1,12 @@
+names:
+- Billboard
+- Fire hydrant
+- Parking meter
+- Stop sign
+- Street light
+- Tent
+- Traffic light
+- Traffic sign
+nc: 8
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_outdoor/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_outdoor/images/validation

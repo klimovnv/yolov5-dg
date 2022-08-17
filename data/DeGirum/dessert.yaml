@@ -1,0 +1,15 @@
+names:
+- Croissant
+- Bagel
+- Candy
+- Cheese
+- Doughnut
+- Honeycomb
+- Ice cream
+- Muffin
+- Pancake
+- Tart
+- Waffle
+nc: 11
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_dessert/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_dessert/images/validation

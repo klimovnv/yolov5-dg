@@ -1,0 +1,6 @@
+names:
+- Truck
+nc: 1
+
+train: /home/mehrdad/wa/dataset_51/exported_dataset/Truck/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/Truck/images/validation

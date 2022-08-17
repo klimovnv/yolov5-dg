@@ -1,0 +1,27 @@
+names:
+- Watermelon
+- Apple
+- Banana
+- Carrot
+- Coconut
+- Common fig
+- Cucumber
+- Grape
+- Grapefruit
+- Lemon
+- Mango
+- Orange
+- Peach
+- Pear
+- Pineapple
+- Pomegranate
+- Potato
+- Pumpkin
+- Squash (Plant)
+- Strawberry
+- Tomato
+- Winter melon
+- Zucchini
+nc: 23
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_fruit/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_fruit/images/validation

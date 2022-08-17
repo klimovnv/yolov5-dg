@@ -1,0 +1,10 @@
+names:
+- Beer
+- Coffee
+- Juice
+- Milk
+- Tea
+- Wine
+nc: 6
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_drink/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_drink/images/validation

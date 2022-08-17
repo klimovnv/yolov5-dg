@@ -1,0 +1,8 @@
+names:
+- Car
+- Van
+- Truck
+nc: 3
+
+train: /home/mehrdad/wa/dataset_51/exported_dataset/Car-Van-Truck/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/Car-Van-Truck/images/validation

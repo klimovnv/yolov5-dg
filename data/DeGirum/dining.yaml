@@ -1,0 +1,13 @@
+names:
+- Chopsticks
+- Coffee cup
+- Mug
+- Plate
+- Saucer
+- Teapot
+- Wine glass
+- Wine rack
+- Pitcher (Container)
+nc: 9
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_dining/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_dining/images/validation

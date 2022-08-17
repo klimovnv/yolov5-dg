@@ -1,0 +1,6 @@
+names:
+- Cat
+- Dog
+nc: 2
+train: /home/mehrdad/wa/dataset_51/exported_dataset/Cat-Dog-/images/train/
+val: /home/mehrdad/wa/dataset_51/exported_dataset/Cat-Dog-/images/validation/

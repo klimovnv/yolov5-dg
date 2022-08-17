@@ -1,0 +1,5 @@
+train: /data/ml-data/HardHat/train/images
+val: /data/ml-data/HardHat/test/images
+
+nc: 2
+names: ['head', 'helmet']

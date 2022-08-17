@@ -1,0 +1,39 @@
+names:
+- Shelf
+- Bathroom cabinet
+- Cabinetry
+- Bench
+- Chair
+- Couch
+- Furniture
+- Bathroom accessory
+- Bathtub
+- Plant
+- Flowerpot
+- Pillow
+- Bed
+- Ceiling fan
+- Tap
+- Fireplace
+- Dishwasher
+- Kitchen & dining room table
+- Table
+- Coffee table
+- Window
+- Swimming pool
+- Computer monitor
+- Refrigerator
+- Sink
+- Tree
+- Oven
+- Television
+- Door
+- Bookcase
+- Vase
+- Lamp
+- Home appliance
+- Sofa bed
+- Kitchen appliance
+nc: 35
+train: /home/mehrdad/wa/dataset_51/exported_dataset/All-3/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/All-3/images/validation

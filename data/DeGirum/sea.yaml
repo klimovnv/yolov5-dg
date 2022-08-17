@@ -1,0 +1,21 @@
+names:
+- Crocodile
+- Dolphin
+- Jellyfish
+- Otter
+- Polar bear
+- Sea lion
+- Shellfish
+- Squid
+- Turtle
+- Whale
+- Lobster
+- Shark
+- Starfish
+- Crab
+- Rays and skates
+- Seahorse
+- Shrimp
+nc: 17
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_sea/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_sea/images/validation

@@ -1,0 +1,7 @@
+names:
+- Duck
+- Goose
+- Swan
+nc: 3
+train: /home/mehrdad/wa/dataset_51/exported_dataset/DuckGooseSwan/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/DuckGooseSwan/images/validation

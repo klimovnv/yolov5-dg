@@ -1,0 +1,19 @@
+names:
+- Blue jay
+- Canary
+- Duck
+- Eagle
+- Falcon
+- Goose
+- Magpie
+- Ostrich
+- Owl
+- Parrot
+- Penguin
+- Raven
+- Sparrow
+- Swan
+- Woodpecker
+nc: 15
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_bird/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_bird/images/validation

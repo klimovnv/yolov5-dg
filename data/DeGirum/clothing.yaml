@@ -1,0 +1,13 @@
+names:
+- Brassiere
+- Coat
+- Cowboy hat
+- Jacket
+- Jeans
+- Shirt
+- Shorts
+- Skirt
+- Trousers
+nc: 9
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_clothing/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_clothing/images/validation

@@ -1,0 +1,48 @@
+names:
+- Alpaca
+- Antelope
+- Armadillo
+- Brown bear
+- Bull
+- Camel
+- Cattle
+- Cheetah
+- Deer
+- Dinosaur
+- Elephant
+- Fox
+- Giraffe
+- Goat
+- Hedgehog
+- Hippopotamus
+- Horse
+- Jaguar (Animal)
+- Kangaroo
+- Koala
+- Leopard
+- Lion
+- Lizard
+- Lynx
+- Monkey
+- Mouse
+- Mule
+- Panda
+- Pig
+- Rabbit
+- Raccoon
+- Red panda
+- Rhinoceros
+- Sheep
+- Skunk
+- Snail
+- Snake
+- Spider
+- Squirrel
+- Tiger
+- Tortoise
+- Turkey
+- Zebra
+- Bear
+nc: 44
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_animal/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_animal/images/validation

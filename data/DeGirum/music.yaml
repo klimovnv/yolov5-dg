@@ -1,0 +1,18 @@
+names:
+- Accordion
+- Banjo
+- Cello
+- Drum
+- Flute
+- French horn
+- Guitar
+- Harmonica
+- Harp
+- Maracas
+- Piano
+- Saxophone
+- Trumpet
+- Violin
+nc: 14
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_music/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_music/images/validation

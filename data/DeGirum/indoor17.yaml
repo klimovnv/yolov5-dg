@@ -1,0 +1,21 @@
+names:
+- Shelf
+- Cabinetry
+- Bench
+- Chair
+- Bathroom accessory
+- Plant
+- Flowerpot
+- Pillow
+- Bed
+- Fireplace
+- Table
+- Swimming pool
+- Computer monitor
+- Refrigerator
+- Sink
+- Door
+- Kitchen appliance
+nc: 17
+train: /home/mehrdad/wa/dataset_51/exported_dataset/All-4/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/All-4/images/validation

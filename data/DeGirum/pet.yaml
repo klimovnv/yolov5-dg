@@ -1,0 +1,7 @@
+names:
+- Cat
+- Dog
+- Hamster
+nc: 3
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_pet/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_pet/images/validation

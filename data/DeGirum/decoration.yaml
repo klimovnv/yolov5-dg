@@ -1,0 +1,21 @@
+names:
+- Bust
+- Candle
+- Chime
+- Christmas tree
+- Fireplace
+- Flag
+- Flowerpot
+- Houseplant
+- Lamp
+- Picture frame
+- Poster
+- Sculpture
+- Snowman
+- Sword
+- Torch
+- Weapon
+- Lantern
+nc: 17
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_decoration/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_decoration/images/validation

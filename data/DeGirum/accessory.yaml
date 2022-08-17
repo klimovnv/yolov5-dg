@@ -1,0 +1,18 @@
+names:
+- Crown
+- Earrings
+- Fedora
+- Footwear
+- Hat
+- High heels
+- Necklace
+- Scarf
+- Sock
+- Sombrero
+- Sun hat
+- Tiara
+- Tie
+- Glove
+nc: 14
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_accessory/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_accessory/images/validation

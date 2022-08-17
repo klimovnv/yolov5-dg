@@ -1,0 +1,5 @@
+names:
+- Person
+nc: 1
+train: /home/mehrdad/wa/dataset_51/exported_dataset/Person-/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/Person-/images/validation

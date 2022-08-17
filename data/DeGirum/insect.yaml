@@ -1,0 +1,10 @@
+names:
+- Butterfly
+- Caterpillar
+- Dragonfly
+- Ladybug
+- Invertebrate
+- Scorpion
+nc: 6
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_insect/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_insect/images/validation

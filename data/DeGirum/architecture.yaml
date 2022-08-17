@@ -1,0 +1,17 @@
+names:
+- Building
+- Castle
+- Fountain
+- Gondola
+- House
+- Lighthouse
+- Porch
+- Skyscraper
+- Swimming pool
+- Tower
+- Tree house
+- Window
+- Stairs
+nc: 13
+train: /home/mehrdad/wa/dataset_51/exported_dataset/_architecture/images/train
+val: /home/mehrdad/wa/dataset_51/exported_dataset/_architecture/images/validation
