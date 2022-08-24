@@ -71,6 +71,15 @@ from utils.general import (LOGGER, check_dataset, check_img_size, check_requirem
                            colorstr, file_size, print_args, url2file)
 from utils.torch_utils import select_device
 
+from models.common import Focus
+
+def has_Focus_layer(model):
+    has_Focus = False
+    for m in model.modules():
+        if isinstance(m, Focus):
+            has_Focus = True
+            break
+    return has_Focus
 
 def export_formats():
     # YOLOv5 export formats
@@ -113,7 +122,14 @@ def export_onnx(model, im, file, opset, train, dynamic, simplify, prefix=colorst
     # YOLOv5 ONNX export
     try:
         check_requirements(('onnx',))
-        import onnx
+
+        import onnx_setting
+        onnx_setting.export_onnx = True
+        #
+        shape = im.shape
+        onnx_setting.has_Focus = has_Focus_layer(model)
+        if onnx_setting.has_Focus:
+            im = im.view( shape[0], shape[1] * 4, shape[2]//2, shape[3]//2 )
 
         LOGGER.info(f'\n{prefix} starting export with onnx {onnx.__version__}...')
         f = file.with_suffix('.onnx')
@@ -300,13 +316,21 @@ def export_saved_model(model,
         import tensorflow as tf
         from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
 
-        from models.tf import TFDetect, TFModel
+        import onnx_setting
+        onnx_setting.export_onnx = True
+        #
+        shape = im.shape
+        onnx_setting.has_Focus = has_Focus_layer(model)
+        if onnx_setting.has_Focus:
+            im = im.view( shape[0], shape[1] * 4, shape[2]//2, shape[3]//2 )
+
+        from models.tf import TFModel
 
         LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
         f = str(file).replace('.pt', '_saved_model')
         batch_size, ch, *imgsz = list(im.shape)  # BCHW
 
-        tf_model = TFModel(cfg=model.yaml, model=model, nc=model.nc, imgsz=imgsz)
+        tf_model = TFModel(cfg=model.yaml, ch=ch, model=model, nc=model.nc, imgsz=imgsz)
         im = tf.zeros((batch_size, *imgsz, ch))  # BHWC order for TensorFlow
         _ = tf_model.predict(im, tf_nms, agnostic_nms, topk_per_class, topk_all, iou_thres, conf_thres)
         inputs = tf.keras.Input(shape=(*imgsz, ch), batch_size=None if dynamic else batch_size)
@@ -363,11 +387,12 @@ def export_tflite(keras_model, im, file, int8, data, nms, agnostic_nms, prefix=c
 
         LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
         batch_size, ch, *imgsz = list(im.shape)  # BCHW
-        f = str(file).replace('.pt', '-fp16.tflite')
+        # f = str(file).replace('.pt', '-fp16.tflite')
+        f = str(file).replace('.pt', '-fp32.tflite')
 
         converter = tf.lite.TFLiteConverter.from_keras_model(keras_model)
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
-        converter.target_spec.supported_types = [tf.float16]
+        converter.target_spec.supported_types = [tf.float32]
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
         if int8:
             from models.tf import representative_dataset_gen

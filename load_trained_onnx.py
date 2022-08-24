@@ -85,7 +85,6 @@ if __name__ == "__main__":
         model = Model(cfg, ch=3, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
 
     model.eval()
-    # DG_Prune.dump_sparsity_stat_weight_base(model, save_dir)
 
 # mAP val    
     # Image sizes
@@ -97,5 +96,5 @@ if __name__ == "__main__":
     # dummy_input = torch.randn(1, 3, opt.imgsz, opt.imgsz, device='cpu')
     dummy_input = torch.randn(1, 12, opt.imgsz // 2, opt.imgsz // 2, device='cpu')
     onnx_file_name = "{}.onnx".format(opt.name)
-    torch.onnx.export(model.to('cpu'), dummy_input, onnx_file_name, export_params=True, opset_version=11, do_constant_folding=True)
+    torch.onnx.export(model.to('cpu'), dummy_input, onnx_file_name, export_params=True, opset_version=None, do_constant_folding=True)
     print (onnx_file_name)
