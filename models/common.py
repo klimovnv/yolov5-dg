@@ -768,3 +768,11 @@ class Classify(nn.Module):
     def forward(self, x):
         z = torch.cat([self.aap(y) for y in (x if isinstance(x, list) else [x])], 1)  # cat if list
         return self.flat(self.conv(z))  # flatten to x(b,c2)
+
+def has_Focus_layer(model : nn.Module) -> bool:
+    has_Focus = False
+    for m in model.modules():
+        if isinstance(m, Focus):
+            has_Focus = True
+            break
+    return has_Focus

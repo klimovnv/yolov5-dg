@@ -70,16 +70,19 @@ from utils.dataloaders import LoadImages
 from utils.general import (LOGGER, check_dataset, check_img_size, check_requirements, check_version, check_yaml,
                            colorstr, file_size, print_args, url2file)
 from utils.torch_utils import select_device
+import onnx
+from models.common import has_Focus_layer
 
-from models.common import Focus
+import onnx_setting
 
-def has_Focus_layer(model):
-    has_Focus = False
-    for m in model.modules():
-        if isinstance(m, Focus):
-            has_Focus = True
-            break
-    return has_Focus
+def reformat_img_wFocus(img, has_Focus:bool):
+    if onnx_setting.export_onnx == True:
+        import copy
+        shape = img.shape
+        img_out = copy.deepcopy(img)
+        if has_Focus:
+            img_out = img_out.view( shape[0], shape[1] * 4, shape[2]//2, shape[3]//2 )
+    return img_out
 
 def export_formats():
     # YOLOv5 export formats
@@ -123,20 +126,16 @@ def export_onnx(model, im, file, opset, train, dynamic, simplify, prefix=colorst
     try:
         check_requirements(('onnx',))
 
-        import onnx_setting
         onnx_setting.export_onnx = True
-        #
-        shape = im.shape
-        onnx_setting.has_Focus = has_Focus_layer(model)
-        if onnx_setting.has_Focus:
-            im = im.view( shape[0], shape[1] * 4, shape[2]//2, shape[3]//2 )
+        im_reform = reformat_img_wFocus(im, has_Focus_layer(model))
+
 
         LOGGER.info(f'\n{prefix} starting export with onnx {onnx.__version__}...')
         f = file.with_suffix('.onnx')
 
         torch.onnx.export(
             model.cpu() if dynamic else model,  # --dynamic only compatible with cpu
-            im.cpu() if dynamic else im,
+            im_reform.cpu() if dynamic else im_reform,
             f,
             verbose=False,
             opset_version=opset,
@@ -316,19 +315,15 @@ def export_saved_model(model,
         import tensorflow as tf
         from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
 
-        import onnx_setting
         onnx_setting.export_onnx = True
-        #
-        shape = im.shape
-        onnx_setting.has_Focus = has_Focus_layer(model)
-        if onnx_setting.has_Focus:
-            im = im.view( shape[0], shape[1] * 4, shape[2]//2, shape[3]//2 )
+        im_reform = reformat_img_wFocus(im, has_Focus_layer(model))
+
 
         from models.tf import TFModel
 
         LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
         f = str(file).replace('.pt', '_saved_model')
-        batch_size, ch, *imgsz = list(im.shape)  # BCHW
+        batch_size, ch, *imgsz = list(im_reform.shape)  # BCHW
 
         tf_model = TFModel(cfg=model.yaml, ch=ch, model=model, nc=model.nc, imgsz=imgsz)
         im = tf.zeros((batch_size, *imgsz, ch))  # BHWC order for TensorFlow
