@@ -311,47 +311,47 @@ def export_saved_model(model,
                        keras=False,
                        prefix=colorstr('TensorFlow SavedModel:')):
     # YOLOv5 TensorFlow SavedModel export
-    try:
-        import tensorflow as tf
-        from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
+    # try:
+    import tensorflow as tf
+    from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
 
-        onnx_setting.export_onnx = True
-        im_reform = reformat_img_wFocus(im, has_Focus_layer(model))
+    onnx_setting.export_onnx = True
+    im_reform = reformat_img_wFocus(im, has_Focus_layer(model))
 
 
-        from models.tf import TFModel
+    from models.tf import TFModel
 
-        LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
-        f = str(file).replace('.pt', '_saved_model')
-        batch_size, ch, *imgsz = list(im_reform.shape)  # BCHW
+    LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
+    f = str(file).replace('.pt', '_saved_model')
+    batch_size, ch, *imgsz = list(im_reform.shape)  # BCHW
 
-        tf_model = TFModel(cfg=model.yaml, ch=ch, model=model, nc=model.nc, imgsz=imgsz)
-        im = tf.zeros((batch_size, *imgsz, ch))  # BHWC order for TensorFlow
-        _ = tf_model.predict(im, tf_nms, agnostic_nms, topk_per_class, topk_all, iou_thres, conf_thres)
-        inputs = tf.keras.Input(shape=(*imgsz, ch), batch_size=None if dynamic else batch_size)
-        outputs = tf_model.predict(inputs, tf_nms, agnostic_nms, topk_per_class, topk_all, iou_thres, conf_thres)
-        keras_model = tf.keras.Model(inputs=inputs, outputs=outputs)
-        keras_model.trainable = False
-        keras_model.summary()
-        if keras:
-            keras_model.save(f, save_format='tf')
-        else:
-            spec = tf.TensorSpec(keras_model.inputs[0].shape, keras_model.inputs[0].dtype)
-            m = tf.function(lambda x: keras_model(x))  # full model
-            m = m.get_concrete_function(spec)
-            frozen_func = convert_variables_to_constants_v2(m)
-            tfm = tf.Module()
-            tfm.__call__ = tf.function(lambda x: frozen_func(x)[:4] if tf_nms else frozen_func(x)[0], [spec])
-            tfm.__call__(im)
-            tf.saved_model.save(tfm,
-                                f,
-                                options=tf.saved_model.SaveOptions(experimental_custom_gradients=False)
-                                if check_version(tf.__version__, '2.6') else tf.saved_model.SaveOptions())
-        LOGGER.info(f'{prefix} export success, saved as {f} ({file_size(f):.1f} MB)')
-        return keras_model, f
-    except Exception as e:
-        LOGGER.info(f'\n{prefix} export failure: {e}')
-        return None, None
+    tf_model = TFModel(cfg=model.yaml, ch=ch, model=model, nc=model.nc, imgsz=imgsz)
+    im = tf.zeros((batch_size, *imgsz, ch))  # BHWC order for TensorFlow
+    _ = tf_model.predict(im, tf_nms, agnostic_nms, topk_per_class, topk_all, iou_thres, conf_thres)
+    inputs = tf.keras.Input(shape=(*imgsz, ch), batch_size=None if dynamic else batch_size)
+    outputs = tf_model.predict(inputs, tf_nms, agnostic_nms, topk_per_class, topk_all, iou_thres, conf_thres)
+    keras_model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    keras_model.trainable = False
+    keras_model.summary()
+    if keras:
+        keras_model.save(f, save_format='tf')
+    else:
+        spec = tf.TensorSpec(keras_model.inputs[0].shape, keras_model.inputs[0].dtype)
+        m = tf.function(lambda x: keras_model(x))  # full model
+        m = m.get_concrete_function(spec)
+        frozen_func = convert_variables_to_constants_v2(m)
+        tfm = tf.Module()
+        tfm.__call__ = tf.function(lambda x: frozen_func(x)[:4] if tf_nms else frozen_func(x)[0], [spec])
+        tfm.__call__(im)
+        tf.saved_model.save(tfm,
+                            f,
+                            options=tf.saved_model.SaveOptions(experimental_custom_gradients=False)
+                            if check_version(tf.__version__, '2.6') else tf.saved_model.SaveOptions())
+    LOGGER.info(f'{prefix} export success, saved as {f} ({file_size(f):.1f} MB)')
+    return keras_model, f
+    # except Exception as e:
+    #     LOGGER.info(f'\n{prefix} export failure: {e}')
+    #     return None, None
 
 
 def export_pb(keras_model, file, prefix=colorstr('TensorFlow GraphDef:')):
@@ -375,39 +375,42 @@ def export_pb(keras_model, file, prefix=colorstr('TensorFlow GraphDef:')):
         LOGGER.info(f'\n{prefix} export failure: {e}')
 
 
-def export_tflite(keras_model, im, file, int8, data, nms, agnostic_nms, prefix=colorstr('TensorFlow Lite:')):
+def export_tflite(keras_model, im, file, int8, data, nms, agnostic_nms, prefix=colorstr('TensorFlow Lite:'), has_Focus_layer=False):
     # YOLOv5 TensorFlow Lite export
-    try:
-        import tensorflow as tf
+    # try:
+    import tensorflow as tf
+    from yolov5_quant_utils import datasetGenerateImagesYolov5
+    LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
+    batch_size, ch, *imgsz = list(im.shape)  # BCHW
+    # f = str(file).replace('.pt', '-fp16.tflite')
+    f = str(file).replace('.pt', '-fp32.tflite')
 
-        LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
-        batch_size, ch, *imgsz = list(im.shape)  # BCHW
-        # f = str(file).replace('.pt', '-fp16.tflite')
-        f = str(file).replace('.pt', '-fp32.tflite')
-
-        converter = tf.lite.TFLiteConverter.from_keras_model(keras_model)
-        converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
-        converter.target_spec.supported_types = [tf.float32]
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        if int8:
-            from models.tf import representative_dataset_gen
-            dataset = LoadImages(check_dataset(check_yaml(data))['train'], img_size=imgsz, auto=False)
+    converter = tf.lite.TFLiteConverter.from_keras_model(keras_model)
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
+    converter.target_spec.supported_types = [tf.float32]
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    if int8:
+        from models.tf import representative_dataset_gen
+        if has_Focus_layer:
+            dataset = LoadImages(check_dataset(check_yaml(data))['val'], img_size=imgsz, auto=False)
             converter.representative_dataset = lambda: representative_dataset_gen(dataset, ncalib=100)
-            converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-            converter.target_spec.supported_types = []
-            converter.inference_input_type = tf.uint8  # or tf.int8
-            converter.inference_output_type = tf.uint8  # or tf.int8
-            converter.experimental_new_quantizer = True
-            f = str(file).replace('.pt', '-int8.tflite')
-        if nms or agnostic_nms:
-            converter.target_spec.supported_ops.append(tf.lite.OpsSet.SELECT_TF_OPS)
+        else:
+            converter.representative_dataset = lambda: datasetGenerateImagesYolov5(image_size=imgsz, image_mask=check_dataset(check_yaml(data))['val']+'/*.jpg', maximum_match=10, print_filenames=True )
+        converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+        converter.target_spec.supported_types = []
+        converter.inference_input_type = tf.uint8  # or tf.int8
+        converter.inference_output_type = tf.uint8  # or tf.int8
+        converter.experimental_new_quantizer = True
+        f = str(file).replace('.pt', '-int8.tflite')
+    if nms or agnostic_nms:
+        converter.target_spec.supported_ops.append(tf.lite.OpsSet.SELECT_TF_OPS)
 
-        tflite_model = converter.convert()
-        open(f, "wb").write(tflite_model)
-        LOGGER.info(f'{prefix} export success, saved as {f} ({file_size(f):.1f} MB)')
-        return f
-    except Exception as e:
-        LOGGER.info(f'\n{prefix} export failure: {e}')
+    tflite_model = converter.convert()
+    open(f, "wb").write(tflite_model)
+    LOGGER.info(f'{prefix} export success, saved as {f} ({file_size(f):.1f} MB)')
+    return f
+    # except Exception as e:
+    #     LOGGER.info(f'\n{prefix} export failure: {e}')
 
 
 def export_edgetpu(file, prefix=colorstr('Edge TPU:')):
@@ -562,7 +565,7 @@ def run(
         if int8 or edgetpu:  # TFLite --int8 bug https://github.com/ultralytics/yolov5/issues/5707
             check_requirements(('flatbuffers==1.12',))  # required before `import tensorflow`
         assert not tflite or not tfjs, 'TFLite and TF.js models must be exported separately, please pass only one type.'
-        model, f[5] = export_saved_model(model.cpu(),
+        keras_model, f[5] = export_saved_model(model.cpu(),
                                          im,
                                          file,
                                          dynamic,
@@ -574,9 +577,9 @@ def run(
                                          conf_thres=conf_thres,
                                          keras=keras)
         if pb or tfjs:  # pb prerequisite to tfjs
-            f[6] = export_pb(model, file)
+            f[6] = export_pb(keras_model, file)
         if tflite or edgetpu:
-            f[7] = export_tflite(model, im, file, int8=int8 or edgetpu, data=data, nms=nms, agnostic_nms=agnostic_nms)
+            f[7] = export_tflite(keras_model, im, file, int8=int8 or edgetpu, data=data, nms=nms, agnostic_nms=agnostic_nms, has_Focus_layer=has_Focus_layer(model))
         if edgetpu:
             f[8] = export_edgetpu(file)
         if tfjs:
