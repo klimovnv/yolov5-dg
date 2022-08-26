@@ -473,6 +473,7 @@ def export_tflite(
     agnostic_nms,
     prefix=colorstr("TensorFlow Lite:"),
     has_Focus_layer=False,
+    max_int8_img_cnt=100,
 ):
     # YOLOv5 TensorFlow Lite export
     # try:
@@ -492,24 +493,25 @@ def export_tflite(
         from models.tf import representative_dataset_gen
 
         if has_Focus_layer:
+            converter.representative_dataset = lambda: datasetGenerateImagesYolov5(
+                image_size=imgsz,
+                image_mask=check_dataset(check_yaml(data))["val"] + "/*.jpg",
+                maximum_match=max_int8_img_cnt,
+                print_filenames=True,
+            )
+        else:
             dataset = LoadImages(
                 check_dataset(check_yaml(data))["val"], img_size=imgsz, auto=False
             )
             converter.representative_dataset = lambda: representative_dataset_gen(
-                dataset, ncalib=100
-            )
-        else:
-            converter.representative_dataset = lambda: datasetGenerateImagesYolov5(
-                image_size=imgsz,
-                image_mask=check_dataset(check_yaml(data))["val"] + "/*.jpg",
-                maximum_match=10,
-                print_filenames=True,
+                dataset, ncalib=max_int8_img_cnt
             )
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
         converter.target_spec.supported_types = []
         converter.inference_input_type = tf.uint8  # or tf.int8
         converter.inference_output_type = tf.uint8  # or tf.int8
         converter.experimental_new_quantizer = True
+        converter._experimental_disable_per_channel = True  # disbable per channel quant
         f = str(file).replace(".pt", "-int8.tflite")
     if nms or agnostic_nms:
         converter.target_spec.supported_ops.append(tf.lite.OpsSet.SELECT_TF_OPS)
@@ -622,6 +624,7 @@ def run(
     keras=False,  # use Keras
     optimize=False,  # TorchScript: optimize for mobile
     int8=False,  # CoreML/TF INT8 quantization
+    max_int8_img_cnt=100,  # Max number of images used for quantization
     dynamic=False,  # ONNX/TF/TensorRT: dynamic axes
     simplify=False,  # ONNX: simplify model
     opset=12,  # ONNX: opset version
@@ -757,6 +760,7 @@ def run(
                 nms=nms,
                 agnostic_nms=agnostic_nms,
                 has_Focus_layer=has_Focus_layer(model),
+                max_int8_img_cnt=max_int8_img_cnt,
             )
         if edgetpu:
             f[8] = export_edgetpu(file)
@@ -818,6 +822,12 @@ def parse_opt():
         "--int8", action="store_true", help="CoreML/TF INT8 quantization"
     )
     parser.add_argument(
+        "--max-int8-img-cnt",
+        type=int,
+        default=100,
+        help="max num images used for quantization",
+    )
+    parser.add_argument(
         "--dynamic", action="store_true", help="ONNX/TF/TensorRT: dynamic axes"
     )
     parser.add_argument("--simplify", action="store_true", help="ONNX: simplify model")
@@ -854,7 +864,6 @@ def parse_opt():
         default=["torchscript", "onnx"],
         help="torchscript, onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs",
     )
-
     opt = parser.parse_args()
     print_args(vars(opt))
     return opt

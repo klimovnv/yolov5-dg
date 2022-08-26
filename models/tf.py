@@ -483,7 +483,10 @@ class TFModel:
                                                             conf_thres,
                                                             clip_boxes=False)
             return nms, x[1]
-        return x[0]  # output only first tensor [1,6300,85] = [xywh, conf, class0, class1, ...]
+        if onnx_setting.export_onnx:
+            return x
+        else:
+            return x[0]  # output only first tensor [1,6300,85] = [xywh, conf, class0, class1, ...]
         # x = x[0][0]  # [x(1,6300,85), ...] to x(6300,85)
         # xywh = x[..., :4]  # x(6300,4) boxes
         # conf = x[..., 4:5]  # x(6300,1) confidences
