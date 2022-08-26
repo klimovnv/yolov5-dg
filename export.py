@@ -375,7 +375,7 @@ def export_pb(keras_model, file, prefix=colorstr('TensorFlow GraphDef:')):
         LOGGER.info(f'\n{prefix} export failure: {e}')
 
 
-def export_tflite(keras_model, im, file, int8, data, nms, agnostic_nms, prefix=colorstr('TensorFlow Lite:'), has_Focus_layer=False):
+def export_tflite(keras_model, im, file, int8, data, nms, agnostic_nms, prefix=colorstr('TensorFlow Lite:'), has_Focus_layer=False, max_int8_img_cnt=100):
     # YOLOv5 TensorFlow Lite export
     # try:
     import tensorflow as tf
@@ -392,15 +392,16 @@ def export_tflite(keras_model, im, file, int8, data, nms, agnostic_nms, prefix=c
     if int8:
         from models.tf import representative_dataset_gen
         if has_Focus_layer:
-            dataset = LoadImages(check_dataset(check_yaml(data))['val'], img_size=imgsz, auto=False)
-            converter.representative_dataset = lambda: representative_dataset_gen(dataset, ncalib=100)
+            converter.representative_dataset = lambda: datasetGenerateImagesYolov5(image_size=imgsz, image_mask=check_dataset(check_yaml(data))['val']+'/*.jpg', maximum_match=max_int8_img_cnt, print_filenames=True )
         else:
-            converter.representative_dataset = lambda: datasetGenerateImagesYolov5(image_size=imgsz, image_mask=check_dataset(check_yaml(data))['val']+'/*.jpg', maximum_match=10, print_filenames=True )
+            dataset = LoadImages(check_dataset(check_yaml(data))['val'], img_size=imgsz, auto=False)
+            converter.representative_dataset = lambda: representative_dataset_gen(dataset, ncalib=max_int8_img_cnt)
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
         converter.target_spec.supported_types = []
         converter.inference_input_type = tf.uint8  # or tf.int8
         converter.inference_output_type = tf.uint8  # or tf.int8
         converter.experimental_new_quantizer = True
+        converter._experimental_disable_per_channel=True    # disbable per channel quant
         f = str(file).replace('.pt', '-int8.tflite')
     if nms or agnostic_nms:
         converter.target_spec.supported_ops.append(tf.lite.OpsSet.SELECT_TF_OPS)
@@ -492,6 +493,7 @@ def run(
         keras=False,  # use Keras
         optimize=False,  # TorchScript: optimize for mobile
         int8=False,  # CoreML/TF INT8 quantization
+        max_int8_img_cnt=100, # Max number of images used for quantization
         dynamic=False,  # ONNX/TF/TensorRT: dynamic axes
         simplify=False,  # ONNX: simplify model
         opset=12,  # ONNX: opset version
@@ -579,7 +581,7 @@ def run(
         if pb or tfjs:  # pb prerequisite to tfjs
             f[6] = export_pb(keras_model, file)
         if tflite or edgetpu:
-            f[7] = export_tflite(keras_model, im, file, int8=int8 or edgetpu, data=data, nms=nms, agnostic_nms=agnostic_nms, has_Focus_layer=has_Focus_layer(model))
+            f[7] = export_tflite(keras_model, im, file, int8=int8 or edgetpu, data=data, nms=nms, agnostic_nms=agnostic_nms, has_Focus_layer=has_Focus_layer(model), max_int8_img_cnt=max_int8_img_cnt)
         if edgetpu:
             f[8] = export_edgetpu(file)
         if tfjs:
@@ -611,6 +613,7 @@ def parse_opt():
     parser.add_argument('--keras', action='store_true', help='TF: use Keras')
     parser.add_argument('--optimize', action='store_true', help='TorchScript: optimize for mobile')
     parser.add_argument('--int8', action='store_true', help='CoreML/TF INT8 quantization')
+    parser.add_argument('--max-int8-img-cnt', type=int, default=100, help='max num images used for quantization')
     parser.add_argument('--dynamic', action='store_true', help='ONNX/TF/TensorRT: dynamic axes')
     parser.add_argument('--simplify', action='store_true', help='ONNX: simplify model')
     parser.add_argument('--opset', type=int, default=12, help='ONNX: opset version')
