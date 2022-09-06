@@ -636,6 +636,7 @@ def run(
     topk_all=100,  # TF.js NMS: topk for all classes to keep
     iou_thres=0.45,  # TF.js NMS: IoU threshold
     conf_thres=0.25,  # TF.js NMS: confidence threshold
+    outfile="out.txt",  # transition information buffer filename
 ):
     t = time.time()
     include = [x.lower() for x in include]  # to lowercase
@@ -762,6 +763,9 @@ def run(
                 has_Focus_layer=has_Focus_layer(model),
                 max_int8_img_cnt=max_int8_img_cnt,
             )
+            fi = open(outfile, "w")
+            fi.write(str(f[7]))
+            fi.close()
         if edgetpu:
             f[8] = export_edgetpu(file)
         if tfjs:
@@ -864,6 +868,7 @@ def parse_opt():
         default=["torchscript", "onnx"],
         help="torchscript, onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs",
     )
+    parser.add_argument("--outfile", type=str, default="out.txt")
     opt = parser.parse_args()
     print_args(vars(opt))
     return opt
