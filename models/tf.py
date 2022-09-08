@@ -27,7 +27,7 @@ import torch
 import torch.nn as nn
 from tensorflow import keras
 
-from models.common import (
+from yolov5_dg.models.common import (
     C3,
     SPP,
     SPPF,
@@ -43,12 +43,12 @@ from models.common import (
     autopad,
     has_Focus_layer,
 )
-from models.experimental import MixConv2d, attempt_load
-from models.yolo import Detect
-from utils.activations import SiLU
-from utils.general import LOGGER, make_divisible, print_args
+from yolov5_dg.models.experimental import MixConv2d, attempt_load
+from yolov5_dg.models.yolo import Detect
+from yolov5_dg.utils.activations import SiLU
+from yolov5_dg.utils.general import LOGGER, make_divisible, print_args
 
-import onnx_setting
+import yolov5_dg.onnx_setting as onnx_setting
 
 
 class TFBN(keras.layers.Layer):

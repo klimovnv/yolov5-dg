@@ -64,10 +64,10 @@ if str(ROOT) not in sys.path:
 if platform.system() != "Windows":
     ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-from models.experimental import attempt_load
-from models.yolo import Detect
-from utils.dataloaders import LoadImages
-from utils.general import (
+from yolov5_dg.models.experimental import attempt_load
+from yolov5_dg.models.yolo import Detect
+from yolov5_dg.utils.dataloaders import LoadImages
+from yolov5_dg.utils.general import (
     LOGGER,
     check_dataset,
     check_img_size,
@@ -79,11 +79,11 @@ from utils.general import (
     print_args,
     url2file,
 )
-from utils.torch_utils import select_device
+from yolov5_dg.utils.torch_utils import select_device
 import onnx
-from models.common import has_Focus_layer
+from yolov5_dg.models.common import has_Focus_layer
 
-import onnx_setting
+import yolov5_dg.onnx_setting as onnx_setting
 
 
 def reformat_img_wFocus(img, has_Focus: bool):
@@ -387,7 +387,7 @@ def export_saved_model(
     onnx_setting.export_onnx = True
     im_reform = reformat_img_wFocus(im, has_Focus_layer(model))
 
-    from models.tf import TFModel
+    from yolov5_dg.models.tf import TFModel
 
     LOGGER.info(f"\n{prefix} starting export with tensorflow {tf.__version__}...")
     f = str(file).replace(".pt", "_saved_model")
@@ -478,7 +478,7 @@ def export_tflite(
     # YOLOv5 TensorFlow Lite export
     # try:
     import tensorflow as tf
-    from yolov5_quant_utils import datasetGenerateImagesYolov5
+    from yolov5_dg.yolov5_quant_utils import datasetGenerateImagesYolov5
 
     LOGGER.info(f"\n{prefix} starting export with tensorflow {tf.__version__}...")
     batch_size, ch, *imgsz = list(im.shape)  # BCHW
@@ -490,7 +490,7 @@ def export_tflite(
     converter.target_spec.supported_types = [tf.float32]
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     if int8:
-        from models.tf import representative_dataset_gen
+        from yolov5_dg.models.tf import representative_dataset_gen
 
         if has_Focus_layer:
             converter.representative_dataset = lambda: datasetGenerateImagesYolov5(

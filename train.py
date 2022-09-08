@@ -36,15 +36,15 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-import val  # for end-of-epoch mAP
-from models.experimental import attempt_load
-from models.yolo import Model
-from utils.autoanchor import check_anchors
-from utils.autobatch import check_train_batch_size
-from utils.callbacks import Callbacks
-from utils.dataloaders import create_dataloader
-from utils.downloads import attempt_download, is_url
-from utils.general import (
+import yolov5_dg.val as val  # for end-of-epoch mAP
+from yolov5_dg.models.experimental import attempt_load
+from yolov5_dg.models.yolo import Model
+from yolov5_dg.utils.autoanchor import check_anchors
+from yolov5_dg.utils.autobatch import check_train_batch_size
+from yolov5_dg.utils.callbacks import Callbacks
+from yolov5_dg.utils.dataloaders import create_dataloader
+from yolov5_dg.utils.downloads import attempt_download, is_url
+from yolov5_dg.utils.general import (
     LOGGER,
     check_amp,
     check_dataset,
@@ -67,12 +67,12 @@ from utils.general import (
     print_mutation,
     strip_optimizer,
 )
-from utils.loggers import Loggers
-from utils.loggers.wandb.wandb_utils import check_wandb_resume
-from utils.loss import ComputeLoss
-from utils.metrics import fitness
-from utils.plots import plot_evolve, plot_labels
-from utils.torch_utils import (
+from yolov5_dg.utils.loggers import Loggers
+from yolov5_dg.utils.loggers.wandb.wandb_utils import check_wandb_resume
+from yolov5_dg.utils.loss import ComputeLoss
+from yolov5_dg.utils.metrics import fitness
+from yolov5_dg.utils.plots import plot_evolve, plot_labels
+from yolov5_dg.utils.torch_utils import (
     EarlyStopping,
     ModelEMA,
     de_parallel,
