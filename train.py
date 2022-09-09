@@ -602,7 +602,7 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
         callbacks.run("on_train_end", last, best, plots, epoch, results)
 
     f = open(opt.outfile, "w")
-    f.write(str(save_dir))
+    f.write(str(best))
     f.close()
     torch.cuda.empty_cache()
     return results
@@ -810,7 +810,7 @@ def main(opt, callbacks=Callbacks()):
         ), "either --cfg or --weights must be specified"
         if opt.evolve:
             if opt.project == str(
-                ROOT / "runs/train"
+                ROOT / "runs"
             ):  # if default project name, rename to runs/evolve
                 opt.project = str(ROOT / "runs/evolve")
             opt.exist_ok, opt.resume = (
@@ -819,6 +819,7 @@ def main(opt, callbacks=Callbacks()):
             )  # pass resume to exist_ok and disable resume
         if opt.name == "cfg":
             opt.name = Path(opt.cfg).stem  # use model.yaml as name
+        opt.name += "/train"
         opt.save_dir = str(
             increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok)
         )
